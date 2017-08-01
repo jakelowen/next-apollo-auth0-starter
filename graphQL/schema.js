@@ -30,9 +30,12 @@ const typeDefs = `
   }
   # this schema allows the following mutation:
   type Mutation {
-    upvotePost (
-      postId: Int!
-    ): Post
+    upvotePost (input: upvotePostInput!): Post!
+  }
+  # inputs
+  input upvotePostInput {
+    postId: Int!
+    voterId: String!
   }
 `;
 

@@ -19,22 +19,41 @@ const db = require('knex')({
 
 // The list of data loaders
 
-const data = {
-  author: new DataLoader(ids => db.table('authors')
-    .whereIn('id', ids).select()
-    .then(rows => ids.map(id => rows.find(x => x.id === id)))),
 
-  post: new DataLoader(ids => db.table('posts')
+exports.authorLoader = new DataLoader(ids => db.table('authors')
     .whereIn('id', ids).select()
-    .then(rows => ids.map(id => rows.find(x => x.id === id)))),
+    .then(rows => ids.map(id => rows.find(x => x.id === id))))
 
-  loadAllPosts: () => db.table('posts').select(),
-  loadAllPostsByAuthor: (authorId) => db.table('posts').where({authorId: authorId}).select(),
-  incrementPostVotes: (postId) => db.table('posts').where({id: postId}).returning('*')
-    .update({
-      'votes': db.raw('votes + 1')
+exports.postLoader = new DataLoader(ids => db.table('posts')
+    .whereIn('id', ids).select()
+    .then(rows => ids.map(id => rows.find(x => x.id === id))))
+
+exports.postVotesLoader = new DataLoader(ids => db.table('post_votes')
+    .countDistinct('voter_id as vote_count') 
+    .whereIn('post_id', ids)
+    .groupBy('post_id')
+    .select('post_id')
+    .then(rows => ids.map(id => {
+      let row = rows.find(x => x.post_id === id)
+      if (row === undefined) {
+        // coerce count to 0 if row doesn't exist in results
+        return {post_id: id, vote_count: 0}
+      } else {
+        return {post_id: id, vote_count: parseInt(row.vote_count, 10)}
+      }
+    })))
+
+exports.loadAllPosts = () => db.table('posts').select()
+
+// TODO convert to data loader!
+exports.loadAllPostsByAuthor = (authorId) => db.table('posts').where({authorId: authorId}).select()
+
+exports.upvotePost = (postId, voterId) => db.table('post_votes')
+    .insert({
+      'voter_id': voterId,
+      'post_id': postId
     })
-    .then(rows => rows[0]),
-};
+    .then(_ => exports.postVotesLoader.clear(postId))
+    .then(_ => exports.postLoader.clear(postId))
+    .then(_ => exports.postLoader.load(postId))
 
-exports.data = data;

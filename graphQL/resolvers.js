@@ -1,12 +1,12 @@
-const data = require('./connectors').data;
+const connectors = require('./connectors');
 
 const resolvers = {
   Query: {
     posts: (obj, args, context, info) => {
-      return data.loadAllPosts()
+      return connectors.loadAllPosts()
     },
-    author: (_, { id }) => data.author.load(id),
-    post: (_, { id }) => data.post.load(id),
+    author: (_, { id }) => connectors.authorLoader.load(id),
+    post: (_, { id }) => connectors.postLoader.load(id),
     me: (obj, args, context, info) => {
       const isAuthorized = context.user.sub !== undefined
       return Object.assign({}, context.user, {
@@ -16,13 +16,15 @@ const resolvers = {
     },
   },
   Mutation: {
-    upvotePost: (_, { postId }) => data.incrementPostVotes(postId)
+    upvotePost: (_, { input }) => connectors.upvotePost(input.postId, input.voterId)
   },
   Author: {
-    posts: (author) => data.loadAllPostsByAuthor(author.id),
+    posts: (author) => connectors.loadAllPostsByAuthor(author.id),
   },
   Post: {
-    author: (post) => data.author.load(post.authorId),
+    author: (post) => connectors.authorLoader.load(post.authorId),
+    votes: (post) => connectors.postVotesLoader.load(post.id)
+      .then(results => results.vote_count)
   },
 };
 
