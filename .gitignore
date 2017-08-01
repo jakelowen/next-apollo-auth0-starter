@@ -1,8 +1,8 @@
 # deployment
-.next/
+.next/*
 
 # env variables
-config/
+config/*
 
 # node 
-node_modules/
+node_modules/*

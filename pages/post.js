@@ -6,7 +6,7 @@ const Content = (props) => (
   <div>
     <h1>Post Details</h1>
     <p>This is the blog post content.</p>
-    <Post postId={props.url.query.postId}/>
+    <Post postId={props.url.query.postId} loggedUser={props.loggedUser}/>
   </div>
 )
 

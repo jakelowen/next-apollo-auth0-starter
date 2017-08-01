@@ -35,5 +35,18 @@
     "react-apollo": "^1.4.8",
     "react-dom": "^15.6.1",
     "react-markdown": "^2.5.0"
+  },
+  "now": {
+    "files": [
+      "config",
+      ".next",
+      "components",
+      "graphQL",
+      "hocs",
+      "lib",
+      "pages",
+      "utils",
+      "server.js"
+    ]
   }
 }

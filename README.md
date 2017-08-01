@@ -1,6 +1,6 @@
 # Next / Apollo stack experiment
 
-demo at: https://hello-next-wjftfcrtdo.now.sh/
+demo at: https://hello-next-exqhgdswfr.now.sh
 
 Pieced together from tutorials:
 * http://dev.apollodata.com/react/

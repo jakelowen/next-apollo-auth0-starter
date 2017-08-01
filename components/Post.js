@@ -1,11 +1,11 @@
 import { gql, graphql } from 'react-apollo'
 import { compose } from 'react-apollo';
 
-const Post = ({postQuery, upVotePostMutation}) => {
+const Post = ({postQuery, upVotePostMutation, loggedUser}) => {
 
   const onClick = () => {
     upVotePostMutation({
-      variables: { postId: postQuery.post.id}
+      variables: { input : {postId: postQuery.post.id, voterId:loggedUser.sub}}
     })
       .then(({ data }) => {
         console.log('got data', data);
@@ -24,8 +24,10 @@ const Post = ({postQuery, upVotePostMutation}) => {
           <strong>Vote:</strong> {postQuery.post.votes}<br />
           <strong>Author:</strong> {postQuery.post.author.firstName} {postQuery.post.author.lastName}
         </p>
-    
-        <button onClick={onClick}>Upvote!</button>
+        <p>
+          <button onClick={onClick}>Upvote!</button><br />
+          You can only vote once!
+        </p>
         <style jsx>{`
           section {
             padding-bottom: 20px;
@@ -52,8 +54,8 @@ query($postId: Int!) {
 `
 
 const upVotePostMutation = gql`
-  mutation($postId: Int!) {
-  upvotePost(postId: $postId) {
+  mutation($input: upvotePostInput!) {
+  upvotePost(input: $input) {
     id
     votes
   }
