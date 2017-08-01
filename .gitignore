@@ -1,0 +1,8 @@
+# deployment
+.next/
+
+# env variables
+config/
+
+# node 
+node_modules/
