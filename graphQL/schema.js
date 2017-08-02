@@ -28,6 +28,10 @@ const typeDefs = `
     author(id: Int!): Author
     me: User
   }
+  type PostVote {
+    postId: Int!
+    voterId: String!
+  }
   # this schema allows the following mutation:
   type Mutation {
     upvotePost (input: upvotePostInput!): Post!
@@ -36,6 +40,10 @@ const typeDefs = `
   input upvotePostInput {
     postId: Int!
     voterId: String!
+  }
+  # hacking on subscriptions - no idea what I'm doing here
+  type Subscription {
+    voteAdded(postId: Int!): PostVote
   }
 `;
 

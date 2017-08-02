@@ -1,20 +1,26 @@
 const express = require('express')
 const next = require('next')
 const bodyParser = require('body-parser')
-const graphqlExpress = require('apollo-server-express').graphqlExpress;
-const schema = require('./graphQL/schema').schema;
+const { graphqlExpress, graphiqlExpress } = require('apollo-server-express')
+const { schema } = require('./graphQL/schema');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
-
+const createServer = require('http').createServer;
+const { SubscriptionServer } = require('subscriptions-transport-ws')
+const { execute, subscribe } = require('graphql')
 const dev = process.env.NODE_ENV !== 'production'
 const app = next({ dev })
 const handle = app.getRequestHandler()
 const PORT = 3000;
-const authConfig = require('./config/authConfig.json')
+
+if (dev) {
+  console.log("DEV MODE!")
+  require('dotenv').config({path: '.env.dev'})
+}
 
 var corsOptions = {
-  origin: 'http://localhost:3000', // dont know what to set here.
+  // origin: 'http://localhost:3000', // dont know what to set here.
   credentials: true // <-- REQUIRED backend setting
 };
 
@@ -36,11 +42,18 @@ app.prepare()
     }
 
     if (request.cookies.jwt) {
-      options.context.user = jwt.verify(request.cookies.jwt, authConfig.AUTH0_SECRET);
+      options.context.user = jwt.verify(request.cookies.jwt, process.env.AUTH0_SECRET);
     }
 
     return options
   }));
+
+  server.use('/graphiql',
+    graphiqlExpress({
+      endpointURL: '/graphql',
+      subscriptionsEndpoint: `ws://localhost:${PORT}/subscriptions`
+    })
+  )
 
   // Next.js custom server routes
   server.get('/p/:id', (req, res) => {
@@ -54,10 +67,21 @@ app.prepare()
     return handle(req, res)
   })
 
-  server.listen(PORT, (err) => {
-    if (err) throw err
-    console.log(`> Ready on http://localhost:${PORT}`)
+  // websocket server example from here: https://github.com/vannizer/graphql-playground
+  // all other tuts seemed to be using depreciated methods with subscriptionManager
+  const ws = createServer(server)
+  ws.listen(PORT, () => {
+    console.log(`GraphQL Server is now running on http://localhost:${PORT}`)
+    // Set up the WebSocket for handling GraphQL subscriptions
+    new SubscriptionServer(
+      { execute, subscribe, schema },
+      {
+        server: ws,
+        path: '/subscriptions'
+      }
+    )
   })
+
 })
 .catch((ex) => {
   console.error(ex.stack)

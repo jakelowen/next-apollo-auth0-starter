@@ -4,16 +4,14 @@ const pg = require('pg');
 pg.defaults.ssl = true;
 const dev = process.env.NODE_ENV !== 'production'
 
-var config = {}
 if (dev) {
-  config = require('../config/env/dev.json')
-} else  {
-  config = require('../config/env/prod.json')
+  console.log("DEV MODE!")
+  require('dotenv').config({path: '.env.dev'})
 }
 
 const db = require('knex')({
   client: 'pg',
-  connection: config.HEROKU_PG_URL,
+  connection: process.env.HEROKU_PG_URL,
   searchPath: 'knex,public'
 });
 

@@ -3,9 +3,9 @@ import { setSecret } from './auth'
 import uuid from 'uuid'
 
 const getLock = (options) => {
-  const config = require('../config/authConfig.json')
   const Auth0Lock = require('auth0-lock').default
-  return new Auth0Lock(config.AUTH0_CLIENT_ID, config.AUTH0_CLIENT_DOMAIN, options)
+  console.log(process.env)
+  return new Auth0Lock("56k9uOTkKnRGHeGp2GkF2jcHGMe3OgLq", "gpsimpact.auth0.com", options)
 }
 
 const getBaseUrl = () => `${window.location.protocol}//${window.location.host}`

@@ -2,7 +2,7 @@
 .next/*
 
 # env variables
-config/*
+.env*
 
 # node 
 node_modules/*
